@@ -1,84 +1,80 @@
-# E-Commerce Project Folder Structure
+# BuyPoint E-Commerce
 
-This document describes the folder structure for the BuyPoint e-commerce template.
+ASP.NET Core 8.0 Razor Pages + API project template for e-commerce application.
 
-## Main Folders
+## 🚀 Getting Started
 
-### 📁 **Models/**
-Contains domain models and entity classes for the e-commerce application.
-- Product models
-- Category models
-- Order models
-- Cart models
-- User/Customer models
-- Payment models
-- Shipping models
+## 📁 Project Structure
 
-### 📁 **Data/**
-Contains database-related code and configurations.
-- **Migrations/**: Entity Framework migrations
-- **SeedData/**: Database seed data and initial data scripts
-- DbContext classes
-- Database configuration
+```
+BuyPoint/
+├── Controllers/          # API Controllers (REST endpoints)
+├── Data/
+│   └── Migrations/       # EF Core database migrations
+├── Models/               # Database entities (User, Product, Order, etc.)
+├── DTOs/                 # Data Transfer Objects for API
+├── Services/             # Business logic layer
+├── Pages/                # Razor Pages (UI)
+├── wwwroot/              # Static files (CSS, JS, images)
+│   └── lib/              # Bootstrap, jQuery
+├── appsettings.json      # Configuration (DB connection, JWT, etc.)
+└── Program.cs            # App startup & DI configuration
+```
 
-### 📁 **Services/**
-Contains business logic services.
-- **Interfaces/**: Service interfaces
-- Product services
-- Order services
-- Cart services
-- Payment services
-- Email services
-- Authentication services
+## 📦 Installed Packages
 
-### 📁 **Repositories/**
-Contains data access layer code.
-- **Interfaces/**: Repository interfaces
-- Product repositories
-- Order repositories
-- User repositories
-- Generic repository implementations
+| Package                                           | Version | Purpose             |
+| ------------------------------------------------- | ------- | ------------------- |
+| Microsoft.EntityFrameworkCore                     | 8.0.0   | ORM for database    |
+| Microsoft.EntityFrameworkCore.SqlServer           | 8.0.0   | SQL Server provider |
+| Microsoft.EntityFrameworkCore.Design              | 8.0.0   | EF migrations       |
+| Microsoft.EntityFrameworkCore.Tools               | 8.0.0   | CLI tools           |
+| Microsoft.AspNetCore.Authentication.JwtBearer     | 8.0.0   | JWT authentication  |
+| Microsoft.AspNetCore.Identity.EntityFrameworkCore | 8.0.0   | User identity       |
+| BCrypt.Net-Next                                   | 4.0.3   | Password hashing    |
 
-### 📁 **ViewModels/**
-Contains view models for passing data to views.
-- Product view models
-- Cart view models
-- Order view models
-- Account view models
+## 🔧 Setup Steps
 
-### 📁 **DTOs/**
-Contains Data Transfer Objects for API communication.
-- Request DTOs
-- Response DTOs
-- API models
+### 1. Configure Database Connection
 
-### 📁 **Infrastructure/**
-Contains infrastructure and cross-cutting concerns.
-- **Extensions/**: Extension methods
-- **Helpers/**: Helper classes and utilities
-- Configuration classes
-- Middleware
-- Custom attributes
+Edit `appsettings.json`:
 
-### 📁 **Areas/**
-Contains area-specific code for organizing large applications.
-- **Admin/**: Admin panel pages and functionality
-  - **Pages/**: Admin Razor Pages
-- **Customer/**: Customer-facing pages
-  - **Pages/**: Customer Razor Pages
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER;Database=BuyPointDB;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
+  }
+}
+```
 
-### 📁 **Pages/**
-Main Razor Pages for the application.
-- **Products/**: Product listing and detail pages
-- **Cart/**: Shopping cart pages
-- **Checkout/**: Checkout process pages
-- **Account/**: User account management pages
-- **Shared/**: Shared layouts and partial views
+### 2. Create Models
 
-## Additional Notes
+Add your entity classes in `Models/` folder:
 
-- All folders are ready for implementation
-- Follow ASP.NET Core best practices for organizing code
-- Use dependency injection for services and repositories
-- Implement proper separation of concerns
+- `User.cs`
+- `Product.cs`
+- `Order.cs`
+- `Category.cs`
 
+### 3. Create DbContext
+
+Add `AppDbContext.cs` in `Data/` folder.
+
+### 4. Run Migrations
+
+```bash
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+```
+
+### 5. Create API Controllers
+
+Add REST API controllers in `Controllers/` folder.
+
+### 6. Create Razor Pages
+
+Add UI pages in `Pages/` folder.
+
+## 📝 License
+
+This project is for educational purposes.
