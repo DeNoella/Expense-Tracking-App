@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BuyPoint")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0a1e1305a3511a5ffef4859898f4406469fc3ff")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+156efcdc476e16ad8cd89ca9bef57e0ecf0a8f8c")]
 [assembly: System.Reflection.AssemblyProductAttribute("BuyPoint")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BuyPoint")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
