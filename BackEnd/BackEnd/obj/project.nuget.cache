@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "2YeWUQC1qzE=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Aime\\Desktop\\DotNet\\BackEnd\\BackEnd\\BackEnd.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Aime\\.nuget\\packages\\fsharp.core\\9.0.303\\fsharp.core.9.0.303.nupkg.sha512"
+  ],
+  "logs": []
+}
