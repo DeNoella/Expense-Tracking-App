@@ -82,6 +82,28 @@ namespace BackEnd.Controllers
             await _db.SaveChangesAsync(cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = announcement.Id }, announcement.ToDto());
         }
+        [HttpPut("{id:guid}")]
+        [RequirePermission("announcement.write")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] AnnouncementRequest request, CancellationToken cancellationToken)
+        {
+            var announcement = await _db.Announcements.FindAsync(new object?[] { id }, cancellationToken);
+            if (announcement is null) return NotFound();
+
+            announcement.Title = request.Title;
+            announcement.Message = request.Message;
+            announcement.Type = request.Type;
+            announcement.Status = request.Status;
+            announcement.Visibility = request.Visibility;
+            announcement.Priority = request.Priority;
+            announcement.StartDate = request.StartDate;
+            announcement.EndDate = request.EndDate;
+            announcement.Dismissible = request.Dismissible;
+            announcement.CreatedBy = request.CreatedBy;
+            announcement.UpdatedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            return Ok(announcement.ToDto());
+        }
 
 
 }
