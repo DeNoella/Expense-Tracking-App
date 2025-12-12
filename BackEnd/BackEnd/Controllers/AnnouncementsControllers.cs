@@ -60,6 +60,28 @@ namespace BackEnd.Controllers
             if (announcement is null) return NotFound();
             return Ok(announcement.ToDto());
         }
+            [HttpPost]
+        [RequirePermission("announcement.write")]
+        public async Task<IActionResult> Create([FromBody] AnnouncementRequest request, CancellationToken cancellationToken)
+        {
+            var announcement = new Announcement
+            {
+                Title = request.Title,
+                Message = request.Message,
+                Type = request.Type,
+                Status = request.Status,
+                Visibility = request.Visibility,
+                Priority = request.Priority,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Dismissible = request.Dismissible,
+                CreatedBy = request.CreatedBy
+            };
+
+            _db.Announcements.Add(announcement);
+            await _db.SaveChangesAsync(cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = announcement.Id }, announcement.ToDto());
+        }
 
 
 }
