@@ -102,3 +102,17 @@ namespace BackEnd.Controllers
             await _db.SaveChangesAsync(cancellationToken);
             return NoContent();
         }
+        private async Task<Cart> GetOrCreateCartAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var cart = await _db.Carts.FirstOrDefaultAsync(c => c.UserId == userId, cancellationToken);
+            if (cart is null)
+            {
+                cart = new Cart { UserId = userId };
+                _db.Carts.Add(cart);
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+
+            return cart;
+        }
+    }
+}
