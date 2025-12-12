@@ -32,5 +32,24 @@ namespace BackEnd.Controllers
             var announcementDtos = announcements.Select(a => a.ToDto()).ToList();
             return Ok(announcementDtos);
         }
+                [HttpGet("active")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        {
+            var now = DateTime.UtcNow;
+            var announcements = await _db.Announcements
+                .AsNoTracking()
+                .Where(a => a.Status == AnnouncementStatus.Active
+                    && a.StartDate <= now
+                    && (a.EndDate == null || a.EndDate >= now)
+                    && a.Visibility == AnnouncementVisibility.Public)
+                .OrderByDescending(a => a.Priority)
+                .ThenByDescending(a => a.CreatedAt)
+                .ToListAsync(cancellationToken);
+            
+            var announcementDtos = announcements.Select(a => a.ToDto()).ToList();
+            return Ok(announcementDtos);
+        }
+
 
 }
