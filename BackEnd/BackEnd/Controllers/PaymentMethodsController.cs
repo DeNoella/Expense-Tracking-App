@@ -47,3 +47,23 @@ public IActionResult GetById(int id, CancellationToken cancellationToken)
     }
     return NotFound();
 }
+[HttpPost]
+[RequirePermission("paymentmethod.write")]
+public IActionResult Create(CancellationToken cancellationToken)
+{
+    return BadRequest("Payment methods are now enum values. Cannot create new payment methods.");
+}
+
+[HttpPut("{id:guid}")]
+[RequirePermission("paymentmethod.write")]
+public IActionResult Update(Guid id, CancellationToken cancellationToken)
+{
+    return BadRequest("Payment methods are now enum values. Cannot update payment methods.");
+}
+
+[HttpDelete("{id:guid}")]
+[RequirePermission("paymentmethod.write")]
+public IActionResult Delete(Guid id, CancellationToken cancellationToken)
+{
+    return BadRequest("Payment methods are now enum values. Cannot delete payment methods.");
+}
