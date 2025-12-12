@@ -14,3 +14,13 @@ namespace BackEnd.Data
             var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<Users>>();
 
             await db.Database.EnsureCreatedAsync(cancellationToken);
+            // Cleanup: Delete all users except the main admin
+            var adminEmail = "aurorenadine25@gmail.com";
+            var allUsers = await db.Users.ToListAsync(cancellationToken);
+            var usersToDelete = allUsers.Where(u => u.Email != adminEmail).ToList();
+
+            if (usersToDelete.Any())
+            {
+                db.Users.RemoveRange(usersToDelete);
+                await db.SaveChangesAsync(cancellationToken);
+            }
