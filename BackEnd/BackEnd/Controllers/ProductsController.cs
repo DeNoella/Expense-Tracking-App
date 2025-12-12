@@ -145,3 +145,15 @@ public async Task<IActionResult> Update(Guid id, [FromBody] ProductRequest reque
     
     return Ok(product.ToDto());
 }
+
+[HttpDelete("{id:guid}")]
+[RequirePermission("product.write")]
+public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+{
+    var product = await _db.Products.FindAsync(new object?[] { id }, cancellationToken);
+    if (product is null) return NotFound();
+
+    _db.Products.Remove(product);
+    await _db.SaveChangesAsync(cancellationToken);
+    return NoContent();
+}
