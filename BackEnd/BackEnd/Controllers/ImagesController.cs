@@ -193,3 +193,30 @@ public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationT
 
     return NoContent();
 }
+[HttpPut("{id:guid}/set-primary")]
+[RequirePermission("product.write")]
+public async Task<IActionResult> SetPrimary(Guid id, CancellationToken cancellationToken)
+{
+    var image = await _db.Images.FindAsync(new object[] { id }, cancellationToken);
+    if (image == null)
+    {
+        return NotFound();
+    }
+
+    if (image.ProductId.HasValue)
+    {
+        var existingPrimary = await _db.Images
+            .Where(i => i.ProductId == image.ProductId && i.IsPrimary && i.Id != id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var img in existingPrimary)
+        {
+            img.IsPrimary = false;
+        }
+    }
+
+    image.IsPrimary = true;
+    await _db.SaveChangesAsync(cancellationToken);
+
+    return Ok(new { Message = "Image set as primary" });
+}
