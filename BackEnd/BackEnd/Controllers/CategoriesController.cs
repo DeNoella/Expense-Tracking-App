@@ -36,3 +36,9 @@ public IActionResult GetAll(CancellationToken cancellationToken)
         .ToList();
     return Ok(categories);
 }
+[HttpPost]
+[RequirePermission("category.write")]
+public IActionResult Create([FromBody] CategoryRequest request, CancellationToken cancellationToken)
+{
+    return BadRequest("Categories are now enum values. Cannot create new categories.");
+}
