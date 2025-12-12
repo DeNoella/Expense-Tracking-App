@@ -51,3 +51,18 @@ public async Task<IActionResult> Create([FromBody] IssueRequest request, Cancell
 
     return Ok(issue.ToDto());
 }
+[HttpGet("me")]
+[RequirePermission("order.view.own")]
+public async Task<IActionResult> MyIssues(CancellationToken cancellationToken)
+{
+    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var issues = await _db.Issues
+        .AsNoTracking()
+        .Where(i => i.UserId == userId)
+        .Include(i => i.Order)
+        .Include(i => i.Product!)
+        .ToListAsync(cancellationToken);
+
+    var issueDtos = issues.Select(i => i.ToDto()).ToList();
+    return Ok(issueDtos);
+}
