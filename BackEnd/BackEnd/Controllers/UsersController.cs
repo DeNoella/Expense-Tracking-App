@@ -123,3 +123,16 @@ public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserRequest re
 
     return Ok(new { Message = "User updated successfully" });
 }
+
+[HttpDelete("{id:guid}")]
+[RequirePermission("user.manage")]
+public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+{
+    var user = await _db.Users.FindAsync(new object?[] { id }, cancellationToken);
+    if (user is null) return NotFound();
+
+    _db.Users.Remove(user);
+    await _db.SaveChangesAsync(cancellationToken);
+
+    return Ok(new { Message = "User deleted successfully" });
+}
