@@ -16,8 +16,7 @@ namespace BackEnd.Controllers
         {
             _db = db;
         }
-    }
-}
+    
 [HttpGet]
 [RequirePermission("permission.manage")]
 public IActionResult GetAll(CancellationToken cancellationToken)
@@ -49,6 +48,7 @@ public IActionResult GetAll(CancellationToken cancellationToken)
         Grouped = grouped
     });
 }
+
 [HttpPost("{userId:guid}")]
 [RequirePermission("permission.manage")]
 public async Task<IActionResult> Assign(Guid userId, [FromBody] AssignPermissionsRequest request, CancellationToken cancellationToken)
@@ -62,3 +62,6 @@ public async Task<IActionResult> Assign(Guid userId, [FromBody] AssignPermission
     
     return Ok(new { Message = "Permissions updated" });
 }
+    
+    }
+    }
