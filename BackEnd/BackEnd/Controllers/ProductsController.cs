@@ -58,3 +58,25 @@ public async Task<IActionResult> GetAll([FromQuery] ProductCategory? category, [
         return StatusCode(500, new { message = "An error occurred while fetching products", error = ex.Message });
     }
 }
+[HttpGet("{id:guid}")]
+[RequirePermission("product.read")]
+public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+{
+    try
+    {
+        var product = await _db.Products.AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        if (product is null) return NotFound();
+        
+        var primaryImage = await _db.Images
+            .FirstOrDefaultAsync(img => img.ProductId == id && img.IsPrimary, cancellationToken);
+        if (primaryImage != null)
+            product.ImageUrl = primaryImage.Url ?? product.ImageUrl;
+        
+        return Ok(product.ToDto());
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "An error occurred while fetching the product", error = ex.Message });
+    }
+}
