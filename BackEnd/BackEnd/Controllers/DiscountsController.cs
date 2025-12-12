@@ -94,3 +94,29 @@ public async Task<IActionResult> Create([FromBody] DiscountRequest request, Canc
     return CreatedAtAction(nameof(GetById), new { id = discount.Id }, discount.ToDto());
 }
 
+[HttpPut("{id:guid}")]
+[RequirePermission("discount.write")]
+public async Task<IActionResult> Update(Guid id, [FromBody] DiscountRequest request, CancellationToken cancellationToken)
+{
+    var discount = await _db.Discounts.FindAsync(new object?[] { id }, cancellationToken);
+    if (discount is null) return NotFound();
+
+    discount.Name = request.Name;
+    discount.Type = request.Type;
+    discount.Value = request.Value;
+    discount.ApplicableTo = request.ApplicableTo;
+    discount.Category = request.Category;
+    discount.ProductId = request.ProductId;
+    discount.StartDate = request.StartDate;
+    discount.EndDate = request.EndDate;
+    discount.MinPurchase = request.MinPurchase;
+    discount.MaxDiscount = request.MaxDiscount;
+    discount.Status = request.Status;
+    discount.UpdatedAt = DateTime.UtcNow;
+
+    await _db.SaveChangesAsync(cancellationToken);
+    
+    await _db.Entry(discount).Reference(d => d.Product).LoadAsync(cancellationToken);
+    
+    return Ok(discount.ToDto());
+}
