@@ -130,3 +130,42 @@ public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
         ExpiresAt = token.ExpiresAt
     });
 }
+[HttpPost("logout")]
+[Authorize]
+public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+{
+    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    
+    var refreshToken = Request.Cookies["refreshToken"];
+    if (!string.IsNullOrEmpty(refreshToken))
+    {
+        await _authService.LogoutAsync(userId, refreshToken, cancellationToken);
+    }
+    
+    ClearTokenCookies();
+    
+    return Ok(new { Message = "Logged out" });
+}
+
+[HttpGet("me")]
+[Authorize]
+public async Task<IActionResult> Me(CancellationToken cancellationToken)
+{
+    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var user = await _authService.GetUserByIdAsync(userId, cancellationToken);
+    
+    var permissions = User.Claims.Where(c => c.Type == "permission").Select(c => c.Value).ToList();
+    var hasAdminPermissions = permissions.Contains("order.view.any") || 
+                              permissions.Any(p => p.Contains("admin") || p == "user.manage" || p == "user.view.any");
+    
+    return Ok(new
+    {
+        UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+        Email = User.FindFirstValue(ClaimTypes.Email),
+        FullName = user?.FullName,
+        Permissions = permissions,
+        HasAdminPermissions = hasAdminPermissions,
+        IsTwoFactorEnabled = user?.IsTwoFactorEnabled ?? false,
+        TwoFactorMethod = user?.TwoFactorMethod
+    });
+}
