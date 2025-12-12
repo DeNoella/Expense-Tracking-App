@@ -113,3 +113,37 @@ catch (Exception ex)
     _logger.LogError(ex, "Error uploading image");
     return StatusCode(500, "Error uploading image");
 }
+[HttpGet]
+[RequirePermission("product.read")]
+public async Task<IActionResult> GetAll(
+    [FromQuery] Guid? productId = null,
+    CancellationToken cancellationToken = default)
+{
+    var query = _db.Images.AsQueryable();
+
+    if (productId.HasValue)
+    {
+        query = query.Where(i => i.ProductId == productId);
+    }
+
+    var images = await query
+        .OrderByDescending(i => i.IsPrimary)
+        .ThenByDescending(i => i.CreatedAt)
+        .Select(i => new ImageDto
+        {
+            Id = i.Id,
+            FileName = i.FileName,
+            FilePath = i.FilePath,
+            Url = i.Url,
+            ContentType = i.ContentType,
+            FileSize = i.FileSize,
+            AltText = i.AltText,
+            Title = i.Title,
+            ProductId = i.ProductId,
+            IsPrimary = i.IsPrimary,
+            CreatedAt = i.CreatedAt
+        })
+        .ToListAsync(cancellationToken);
+
+    return Ok(images);
+}
