@@ -39,3 +39,16 @@ namespace BackEnd.Data
                 db.Users.Add(admin);
                 await db.SaveChangesAsync(cancellationToken);
             }
+            else
+            {
+                if (string.IsNullOrEmpty(admin.Permissions))
+                {
+                    admin.Permissions = string.Join(",", PermissionConstants.All);
+                    await db.SaveChangesAsync(cancellationToken);
+                }
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
+        }
+    }
+}
