@@ -91,3 +91,35 @@ public async Task<IActionResult> GetById(Guid id, CancellationToken cancellation
 
     return Ok(userDto);
 }
+[HttpPut("{id:guid}")]
+[RequirePermission("user.manage")]
+public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
+{
+    var user = await _db.Users.FindAsync(new object?[] { id }, cancellationToken);
+    if (user is null) return NotFound();
+
+    if (!string.IsNullOrWhiteSpace(request.FullName))
+    {
+        user.FullName = request.FullName;
+    }
+
+    if (request.IsEmailVerified.HasValue)
+    {
+        user.IsEmailVerified = request.IsEmailVerified.Value;
+    }
+
+    if (request.Permissions != null)
+    {
+        var validPermissions = request.Permissions
+            .Where(p => PermissionConstants.All.Contains(p))
+            .Distinct()
+            .ToList();
+        
+        user.Permissions = string.Join(",", validPermissions);
+    }
+
+    user.UpdatedAt = DateTime.UtcNow;
+    await _db.SaveChangesAsync(cancellationToken);
+
+    return Ok(new { Message = "User updated successfully" });
+}
