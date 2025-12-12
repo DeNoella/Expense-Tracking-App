@@ -104,6 +104,18 @@ namespace BackEnd.Controllers
             await _db.SaveChangesAsync(cancellationToken);
             return Ok(announcement.ToDto());
         }
+        [HttpDelete("{id:guid}")]
+        [RequirePermission("announcement.write")]
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+        {
+            var announcement = await _db.Announcements.FindAsync(new object?[] { id }, cancellationToken);
+            if (announcement is null) return NotFound();
+
+            _db.Announcements.Remove(announcement);
+            await _db.SaveChangesAsync(cancellationToken);
+            return NoContent();
+        }
+    }
 
 
 }
