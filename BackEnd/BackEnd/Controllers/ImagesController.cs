@@ -176,3 +176,20 @@ public async Task<IActionResult> GetById(Guid id, CancellationToken cancellation
 
     return Ok(image);
 }
+[HttpDelete("{id:guid}")]
+[RequirePermission("product.write")]
+public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+{
+    var image = await _db.Images.FindAsync(new object[] { id }, cancellationToken);
+    if (image == null)
+    {
+        return NotFound();
+    }
+
+    await _imageService.DeleteImageAsync(image.FilePath, cancellationToken);
+
+    _db.Images.Remove(image);
+    await _db.SaveChangesAsync(cancellationToken);
+
+    return NoContent();
+}
