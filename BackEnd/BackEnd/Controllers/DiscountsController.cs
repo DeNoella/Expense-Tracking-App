@@ -35,3 +35,36 @@ public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     var discountDtos = discounts.Select(d => d.ToDto()).ToList();
     return Ok(discountDtos);
 }
+[HttpGet("{id:guid}")]
+[RequirePermission("discount.read")]
+public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+{
+    var discount = await _db.Discounts
+        .AsNoTracking()
+        .Include(d => d.Category)
+        .Include(d => d.Product!)
+            .ThenInclude(p => p.Category)
+        .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
+
+    if (discount is null) return NotFound();
+
+    return Ok(discount.ToDto());
+}
+
+[HttpGet("{id:guid}")]
+[RequirePermission("discount.read")]
+public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+{
+    var discount = await _db.Discounts
+        .AsNoTracking()
+        .Include(d => d.Category)
+        .Include(d => d.Product!)
+            .ThenInclude(p => p.Category)
+        .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
+
+    if (discount is null) return NotFound();
+
+    return Ok(discount.ToDto());
+}
+
+
