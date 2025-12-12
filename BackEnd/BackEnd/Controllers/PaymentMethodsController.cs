@@ -36,3 +36,14 @@ public IActionResult GetAll(CancellationToken cancellationToken)
     
     return Ok(paymentMethods);
 }
+[HttpGet("{id:int}")]
+[RequirePermission("paymentmethod.read")]
+public IActionResult GetById(int id, CancellationToken cancellationToken)
+{
+    if (Enum.IsDefined(typeof(PaymentMethodType), id))
+    {
+        var pm = (PaymentMethodType)id;
+        return Ok(new { Id = id, Name = pm.ToString(), Value = pm });
+    }
+    return NotFound();
+}
