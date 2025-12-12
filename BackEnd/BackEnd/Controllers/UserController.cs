@@ -185,3 +185,23 @@ public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest r
     if (!success) return BadRequest("Invalid or expired reset code");
     return Ok(new { Message = "Password reset successfully" });
 }
+
+[HttpPost("enable-2fa")]
+[Authorize]
+public async Task<IActionResult> Enable2FA([FromBody] Enable2FARequest request, CancellationToken cancellationToken)
+{
+    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var success = await _authService.Enable2FAAsync(userId, request, cancellationToken);
+    if (!success) return BadRequest("Failed to enable 2FA. Make sure your email is verified.");
+    return Ok(new { Message = "2FA enabled successfully" });
+}
+
+[HttpPost("disable-2fa")]
+[Authorize]
+public async Task<IActionResult> Disable2FA(CancellationToken cancellationToken)
+{
+    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var success = await _authService.Disable2FAAsync(userId, cancellationToken);
+    if (!success) return BadRequest("Failed to disable 2FA");
+    return Ok(new { Message = "2FA disabled successfully" });
+}
