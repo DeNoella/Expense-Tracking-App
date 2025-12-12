@@ -20,3 +20,19 @@ namespace BackEnd.Controllers
         }
     }
 }
+[HttpGet]
+[RequirePermission("paymentmethod.read")]
+public IActionResult GetAll(CancellationToken cancellationToken)
+{
+    var paymentMethods = Enum.GetValues(typeof(PaymentMethodType))
+        .Cast<PaymentMethodType>()
+        .Select(pm => new
+        {
+            Id = (int)pm,
+            Name = pm.ToString(),
+            Value = pm
+        })
+        .ToList();
+    
+    return Ok(paymentMethods);
+}
