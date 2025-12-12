@@ -116,6 +116,19 @@ namespace BackEnd.Controllers
             return NoContent();
         }
     }
-
-
+    public class AnnouncementRequest
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public AnnouncementType Type { get; set; }
+        public AnnouncementStatus Status { get; set; }
+        public AnnouncementVisibility Visibility { get; set; }
+        public AnnouncementPriority Priority { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public bool Dismissible { get; set; } = true;
+        public string? CreatedBy { get; set; }
+    }
 }
+
+
