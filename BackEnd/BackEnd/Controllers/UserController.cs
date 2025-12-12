@@ -205,3 +205,27 @@ public async Task<IActionResult> Disable2FA(CancellationToken cancellationToken)
     if (!success) return BadRequest("Failed to disable 2FA");
     return Ok(new { Message = "2FA disabled successfully" });
 }
+
+[HttpPost("resend-otp")]
+[AllowAnonymous]
+public async Task<IActionResult> ResendOtp([FromBody] ResendOtpRequest request, CancellationToken cancellationToken)
+{
+    if (!ModelState.IsValid)
+    {
+        var errors = ModelState
+            .Where(x => x.Value?.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors.Select(e => e.ErrorMessage))
+            .ToList();
+        return BadRequest(new { message = "Validation failed", errors });
+    }
+
+    var success = await _authService.ResendOtpAsync(request.Email, cancellationToken);
+    if (!success)
+    {
+        return BadRequest(new { message = "Unable to resend OTP. Email may already be verified or account does not exist." });
+    }
+    
+    return Ok(new { Message = "Verification code has been resent to your email" });
+}
+
+
