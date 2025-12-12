@@ -55,3 +55,61 @@ public async Task<IActionResult> UploadImage(
     {
         return BadRequest("File size exceeds 10MB limit");
     }
+try
+{
+    var filePath = await _imageService.SaveImageAsync(
+        file.OpenReadStream(),
+        file.FileName,
+        file.ContentType,
+        cancellationToken);
+
+    var imageUrl = _imageService.GetImageUrl(filePath);
+
+    if (isPrimary && productId.HasValue)
+    {
+        var existingPrimary = await _db.Images
+            .Where(i => i.ProductId == productId && i.IsPrimary)
+            .ToListAsync(cancellationToken);
+
+        foreach (var img in existingPrimary)
+        {
+            img.IsPrimary = false;
+        }
+    }
+
+    var image = new Image
+    {
+        FileName = file.FileName,
+        FilePath = filePath,
+        Url = imageUrl,
+        ContentType = file.ContentType,
+        FileSize = file.Length,
+        AltText = altText,
+        Title = title,
+        ProductId = productId,
+        IsPrimary = isPrimary
+    };
+
+    _db.Images.Add(image);
+    await _db.SaveChangesAsync(cancellationToken);
+
+    return Ok(new ImageDto
+    {
+        Id = image.Id,
+        FileName = image.FileName,
+        FilePath = image.FilePath,
+        Url = image.Url,
+        ContentType = image.ContentType,
+        FileSize = image.FileSize,
+        AltText = image.AltText,
+        Title = image.Title,
+        ProductId = image.ProductId,
+        IsPrimary = image.IsPrimary,
+        CreatedAt = image.CreatedAt
+    });
+}
+catch (Exception ex)
+{
+    _logger.LogError(ex, "Error uploading image");
+    return StatusCode(500, "Error uploading image");
+}
