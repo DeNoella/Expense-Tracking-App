@@ -48,3 +48,9 @@ public IActionResult Update(Guid id, [FromBody] CategoryRequest request, Cancell
 {
     return BadRequest("Categories are now enum values. Cannot update categories.");
 }
+[HttpDelete("{id:guid}")]
+[RequirePermission("category.write")]
+public IActionResult Delete(Guid id, CancellationToken cancellationToken)
+{
+    return BadRequest("Categories are now enum values. Cannot delete categories.");
+}
