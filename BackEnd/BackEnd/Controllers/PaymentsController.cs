@@ -19,3 +19,29 @@ namespace BackEnd.Controllers
         }
     }
 }
+
+[HttpPost]
+[RequirePermission("payment.record")]
+public async Task<IActionResult> Record([FromBody] PaymentRequest request, CancellationToken cancellationToken)
+{
+    var order = await _db.Orders.Include(o => o.Payments).FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
+    if (order is null) return NotFound("Order not found");
+
+    var payment = new Payment
+    {
+        OrderId = order.Id,
+        Method = request.Method,
+        Amount = request.Amount,
+        TransactionReference = request.TransactionReference,
+        Status = PaymentStatus.Completed,
+        PaidAt = DateTime.UtcNow
+    };
+
+    order.Payments.Add(payment);
+    order.Status = OrderStatus.Paid;
+    order.UpdatedAt = DateTime.UtcNow;
+
+    await _db.SaveChangesAsync(cancellationToken);
+    return Ok(payment);
+}
+
