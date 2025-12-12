@@ -83,3 +83,31 @@ namespace BackEnd.Data
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId);
+            modelBuilder.Entity<Issue>()
+                .HasOne(i => i.Order)
+                .WithMany(o => o.Issues)
+                .HasForeignKey(i => i.OrderId);
+
+            modelBuilder.Entity<Issue>()
+                .HasOne(i => i.OrderItem)
+                .WithMany()
+                .HasForeignKey(i => i.OrderItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Issue>()
+                .HasOne(i => i.User)
+                .WithMany(u => u.Issues)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Issue>()
+                .HasOne(i => i.Product)
+                .WithMany()
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Discount>()
+                .HasOne(d => d.Product)
+                .WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
