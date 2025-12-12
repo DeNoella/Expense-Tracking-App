@@ -81,3 +81,22 @@ public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     var issueDtos = issues.Select(i => i.ToDto()).ToList();
     return Ok(issueDtos);
 }
+[HttpPatch("{id:guid}")]
+[RequirePermission("issue.resolve")]
+public async Task<IActionResult> Update(Guid id, [FromBody] IssueUpdateRequest request, CancellationToken cancellationToken)
+{
+    var issue = await _db.Issues.FindAsync(new object?[] { id }, cancellationToken);
+    if (issue is null) return NotFound();
+
+    issue.Status = request.Status;
+    issue.AdminResponse = request.AdminResponse;
+    issue.UpdatedAt = DateTime.UtcNow;
+
+    await _db.SaveChangesAsync(cancellationToken);
+
+    await _db.Entry(issue).Reference(i => i.Order).LoadAsync(cancellationToken);
+    await _db.Entry(issue).Reference(i => i.Product).LoadAsync(cancellationToken);
+    await _db.Entry(issue).Reference(i => i.User).LoadAsync(cancellationToken);
+
+    return Ok(issue.ToDto());
+}
