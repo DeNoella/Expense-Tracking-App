@@ -147,3 +147,32 @@ public async Task<IActionResult> GetAll(
 
     return Ok(images);
 }
+[HttpGet("{id:guid}")]
+[RequirePermission("product.read")]
+public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+{
+    var image = await _db.Images
+        .Where(i => i.Id == id)
+        .Select(i => new ImageDto
+        {
+            Id = i.Id,
+            FileName = i.FileName,
+            FilePath = i.FilePath,
+            Url = i.Url,
+            ContentType = i.ContentType,
+            FileSize = i.FileSize,
+            AltText = i.AltText,
+            Title = i.Title,
+            ProductId = i.ProductId,
+            IsPrimary = i.IsPrimary,
+            CreatedAt = i.CreatedAt
+        })
+        .FirstOrDefaultAsync(cancellationToken);
+
+    if (image == null)
+    {
+        return NotFound();
+    }
+
+    return Ok(image);
+}
