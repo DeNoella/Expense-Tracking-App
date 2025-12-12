@@ -20,3 +20,19 @@ namespace BackEnd.Controllers
         }
     }
 }
+[HttpGet]
+[RequirePermission("category.read")]
+public IActionResult GetAll(CancellationToken cancellationToken)
+{
+    // Return enum values as categories
+    var categories = Enum.GetValues(typeof(ProductCategory))
+        .Cast<ProductCategory>()
+        .Select(c => new
+        {
+            Id = (int)c,
+            Name = c.ToString(),
+            Value = c
+        })
+        .ToList();
+    return Ok(categories);
+}
