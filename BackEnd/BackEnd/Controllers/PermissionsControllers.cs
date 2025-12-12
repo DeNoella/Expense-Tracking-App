@@ -49,3 +49,16 @@ public IActionResult GetAll(CancellationToken cancellationToken)
         Grouped = grouped
     });
 }
+[HttpPost("{userId:guid}")]
+[RequirePermission("permission.manage")]
+public async Task<IActionResult> Assign(Guid userId, [FromBody] AssignPermissionsRequest request, CancellationToken cancellationToken)
+{
+    var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+    if (user is null) return NotFound();
+
+    // Set permissions as comma-separated string
+    user.Permissions = string.Join(",", request.Permissions.Distinct());
+    await _db.SaveChangesAsync(cancellationToken);
+    
+    return Ok(new { Message = "Permissions updated" });
+}
