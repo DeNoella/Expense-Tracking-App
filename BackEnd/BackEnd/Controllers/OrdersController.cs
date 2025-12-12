@@ -99,3 +99,28 @@ public async Task<IActionResult> MyOrders(CancellationToken cancellationToken)
     var orderDtos = orders.Select(o => o.ToDto()).ToList();
     return Ok(orderDtos);
 }
+[HttpGet("{id:guid}")]
+[Authorize]
+public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+{
+    var order = await _db.Orders
+        .AsNoTracking()
+        .Include(o => o.Items)
+            .ThenInclude(i => i.Product)
+                .ThenInclude(p => p.Category)
+        .Include(o => o.Payments)
+        .Include(o => o.User)
+        .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+
+    if (order is null) return NotFound();
+
+    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var hasAllAccess = User.HasClaim(c => c.Type == PermissionConstants.ClaimType && c.Value == "order.view.any");
+
+    if (order.UserId != userId && !hasAllAccess)
+    {
+        return Forbid();
+    }
+
+    return Ok(order.ToDto());
+}
