@@ -156,3 +156,27 @@ public async Task<IActionResult> DeleteAllUsers(CancellationToken cancellationTo
     _logger.LogInformation("Deleted {Count} users (admin preserved)", usersToDelete.Count);
     return Ok(new { Message = $"Successfully deleted {usersToDelete.Count} user(s). Admin account preserved." });
 }
+[HttpPost("dev/delete-all-users")]
+[AllowAnonymous]
+public async Task<IActionResult> DevDeleteAllUsers(CancellationToken cancellationToken)
+{
+    if (!_environment.IsDevelopment())
+    {
+        return Forbid("This endpoint is only available in Development mode");
+    }
+
+    const string adminEmail = "aurorenadine25@gmail.com";
+    var allUsers = await _db.Users.ToListAsync(cancellationToken);
+    var usersToDelete = allUsers.Where(u => u.Email != adminEmail).ToList();
+    
+    if (!usersToDelete.Any())
+    {
+        return Ok(new { Message = "No users to delete (only admin exists)", DeletedCount = 0 });
+    }
+
+    _db.Users.RemoveRange(usersToDelete);
+    await _db.SaveChangesAsync(cancellationToken);
+
+    _logger.LogInformation("DEV: Deleted {Count} users (admin preserved)", usersToDelete.Count);
+    return Ok(new { Message = $"Successfully deleted {usersToDelete.Count} user(s). Admin account preserved.", DeletedCount = usersToDelete.Count });
+}
