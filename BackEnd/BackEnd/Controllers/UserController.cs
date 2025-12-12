@@ -228,4 +228,47 @@ public async Task<IActionResult> ResendOtp([FromBody] ResendOtpRequest request, 
     return Ok(new { Message = "Verification code has been resent to your email" });
 }
 
+private void SetTokenCookies(TokenResponse token)
+{
+    var isDevelopment = _environment?.IsDevelopment() ?? false;
+    
+    var cookieOptions = new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = !isDevelopment,
+        SameSite = SameSiteMode.Strict,
+        Expires = token.ExpiresAt,
+        Path = "/"
+    };
+
+    Response.Cookies.Append("accessToken", token.AccessToken, cookieOptions);
+
+    var refreshCookieOptions = new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = !isDevelopment,
+        SameSite = SameSiteMode.Strict,
+        Expires = DateTime.UtcNow.AddDays(7),
+        Path = "/"
+    };
+    Response.Cookies.Append("refreshToken", token.RefreshToken, refreshCookieOptions);
+}
+
+private void ClearTokenCookies()
+{
+    var isDevelopment = _environment?.IsDevelopment() ?? false;
+    
+    var cookieOptions = new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = !isDevelopment,
+        SameSite = SameSiteMode.Strict,
+        Expires = DateTime.UtcNow.AddDays(-1),
+        Path = "/"
+    };
+
+    Response.Cookies.Append("accessToken", "", cookieOptions);
+    Response.Cookies.Append("refreshToken", "", cookieOptions);
+}
+
 
