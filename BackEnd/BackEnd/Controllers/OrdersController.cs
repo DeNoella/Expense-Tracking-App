@@ -140,3 +140,24 @@ public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     var orderDtos = orders.Select(o => o.ToDto()).ToList();
     return Ok(orderDtos);
 }
+[HttpPatch("{id:guid}/status")]
+[RequirePermission("order.status.update")]
+public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] OrderStatusUpdateRequest request, CancellationToken cancellationToken)
+{
+    var order = await _db.Orders.FindAsync(new object?[] { id }, cancellationToken);
+    if (order is null) return NotFound();
+
+    order.Status = request.Status;
+    order.UpdatedAt = DateTime.UtcNow;
+
+    await _db.SaveChangesAsync(cancellationToken);
+    
+    await _db.Entry(order).Collection(o => o.Items).Query()
+        .Include(i => i.Product)
+            .ThenInclude(p => p.Category)
+        .LoadAsync(cancellationToken);
+    await _db.Entry(order).Reference(o => o.User).LoadAsync(cancellationToken);
+    await _db.Entry(order).Collection(o => o.Payments).LoadAsync(cancellationToken);
+    
+    return Ok(order.ToDto());
+}
