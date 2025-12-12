@@ -82,3 +82,20 @@ public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request, Ca
 
     return Ok(new { order.Id, order.OrderNumber, order.Total, order.Status });
 }
+[HttpGet("me")]
+[RequirePermission("order.view.own")]
+public async Task<IActionResult> MyOrders(CancellationToken cancellationToken)
+{
+    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var orders = await _db.Orders
+        .AsNoTracking()
+        .Where(o => o.UserId == userId)
+        .Include(o => o.Items)
+            .ThenInclude(i => i.Product)
+                .ThenInclude(p => p.Category)
+        .OrderByDescending(o => o.CreatedAt)
+        .ToListAsync(cancellationToken);
+
+    var orderDtos = orders.Select(o => o.ToDto()).ToList();
+    return Ok(orderDtos);
+}
