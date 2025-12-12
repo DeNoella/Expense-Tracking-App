@@ -50,6 +50,16 @@ namespace BackEnd.Controllers
             var announcementDtos = announcements.Select(a => a.ToDto()).ToList();
             return Ok(announcementDtos);
         }
+            [HttpGet("{id:guid}")]
+        [RequirePermission("announcement.read")]
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+        {
+            var announcement = await _db.Announcements
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+            if (announcement is null) return NotFound();
+            return Ok(announcement.ToDto());
+        }
 
 
 }
