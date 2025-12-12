@@ -180,3 +180,11 @@ public async Task<IActionResult> DevDeleteAllUsers(CancellationToken cancellatio
     _logger.LogInformation("DEV: Deleted {Count} users (admin preserved)", usersToDelete.Count);
     return Ok(new { Message = $"Successfully deleted {usersToDelete.Count} user(s). Admin account preserved.", DeletedCount = usersToDelete.Count });
 }
+
+public class UpdateUserRequest
+{
+    public string? FullName { get; set; }
+    public bool? IsEmailVerified { get; set; }
+    public IEnumerable<string>? Permissions { get; set; }
+}
+
