@@ -107,3 +107,26 @@ public async Task<IActionResult> Verify2FA([FromBody] Verify2FARequest request, 
         ExpiresAt = token.ExpiresAt
     });
 }
+
+[HttpPost("refresh")]
+[AllowAnonymous]
+public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
+{
+    var refreshToken = Request.Cookies["refreshToken"];
+    if (string.IsNullOrEmpty(refreshToken))
+    {
+        return Unauthorized("Refresh token not found");
+    }
+    
+    var token = await _authService.RefreshAsync(new RefreshRequest { RefreshToken = refreshToken }, cancellationToken);
+    if (token is null) return Unauthorized("Invalid refresh token");
+    
+    SetTokenCookies(token);
+    
+    return Ok(new
+    {
+        Email = token.Email,
+        Permissions = token.Permissions,
+        ExpiresAt = token.ExpiresAt
+    });
+}
