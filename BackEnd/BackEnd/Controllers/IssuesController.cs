@@ -66,3 +66,18 @@ public async Task<IActionResult> MyIssues(CancellationToken cancellationToken)
     var issueDtos = issues.Select(i => i.ToDto()).ToList();
     return Ok(issueDtos);
 }
+[HttpGet]
+[RequirePermission("issue.view")]
+public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+{
+    var issues = await _db.Issues
+        .AsNoTracking()
+        .Include(i => i.User)
+        .Include(i => i.Order)
+        .Include(i => i.Product!)
+        .OrderByDescending(i => i.CreatedAt)
+        .ToListAsync(cancellationToken);
+
+    var issueDtos = issues.Select(i => i.ToDto()).ToList();
+    return Ok(issueDtos);
+}
