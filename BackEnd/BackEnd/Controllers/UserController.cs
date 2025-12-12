@@ -169,3 +169,19 @@ public async Task<IActionResult> Me(CancellationToken cancellationToken)
         TwoFactorMethod = user?.TwoFactorMethod
     });
 }
+[HttpPost("forgot-password")]
+[AllowAnonymous]
+public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+{
+    var success = await _authService.RequestPasswordResetAsync(request.Email, cancellationToken);
+    return Ok(new { Message = "If the email exists, a password reset code has been sent." });
+}
+
+[HttpPost("reset-password")]
+[AllowAnonymous]
+public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken cancellationToken)
+{
+    var success = await _authService.ResetPasswordAsync(request, cancellationToken);
+    if (!success) return BadRequest("Invalid or expired reset code");
+    return Ok(new { Message = "Password reset successfully" });
+}
