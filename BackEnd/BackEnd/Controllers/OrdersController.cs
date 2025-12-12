@@ -124,3 +124,19 @@ public async Task<IActionResult> GetById(Guid id, CancellationToken cancellation
 
     return Ok(order.ToDto());
 }
+[HttpGet]
+[RequirePermission("order.view.any")]
+public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+{
+    var orders = await _db.Orders
+        .AsNoTracking()
+        .Include(o => o.User)
+        .Include(o => o.Items)
+            .ThenInclude(i => i.Product)
+                .ThenInclude(p => p.Category)
+        .OrderByDescending(o => o.CreatedAt)
+        .ToListAsync(cancellationToken);
+    
+    var orderDtos = orders.Select(o => o.ToDto()).ToList();
+    return Ok(orderDtos);
+}
