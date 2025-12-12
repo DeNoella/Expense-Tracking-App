@@ -120,3 +120,15 @@ public async Task<IActionResult> Update(Guid id, [FromBody] DiscountRequest requ
     
     return Ok(discount.ToDto());
 }
+[HttpDelete("{id:guid}")]
+[RequirePermission("discount.write")]
+public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+{
+    var discount = await _db.Discounts.FindAsync(new object?[] { id }, cancellationToken);
+    if (discount is null) return NotFound();
+
+    _db.Discounts.Remove(discount);
+    await _db.SaveChangesAsync(cancellationToken);
+
+    return NoContent();
+}
