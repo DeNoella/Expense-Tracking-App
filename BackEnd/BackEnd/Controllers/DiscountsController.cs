@@ -132,3 +132,17 @@ public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationT
 
     return NoContent();
 }
+public class DiscountRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public DiscountType Type { get; set; }
+    public decimal Value { get; set; }
+    public DiscountApplicableTo ApplicableTo { get; set; }
+    public ProductCategory? Category { get; set; }
+    public Guid? ProductId { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public decimal? MinPurchase { get; set; }
+    public decimal? MaxDiscount { get; set; }
+    public DiscountStatus Status { get; set; }
+}
