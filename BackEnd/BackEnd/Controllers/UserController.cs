@@ -24,3 +24,44 @@ namespace BackEnd.Controllers
         }
     }
 }
+[HttpPost("register")]
+[AllowAnonymous]
+public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+{
+    try
+    {
+        var user = await _authService.RegisterAsync(request, cancellationToken);
+        return Ok(new { user.Email, user.Id, Message = "User registered. Check email for OTP." });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return BadRequest(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        _logger?.LogError(ex, "Error during user registration");
+        return StatusCode(500, new { message = "An error occurred during registration. Please try again." });
+    }
+}
+
+[HttpPost("verify-email")]
+[AllowAnonymous]
+public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request, CancellationToken cancellationToken)
+{
+    if (!ModelState.IsValid)
+    {
+        var errors = ModelState
+            .Where(x => x.Value?.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors.Select(e => e.ErrorMessage))
+            .ToList();
+        return BadRequest(new { message = "Validation failed", errors });
+    }
+
+    var success = await _authService.VerifyEmailAsync(request, cancellationToken);
+    if (!success)
+    {
+        return BadRequest(new { message = "Invalid or expired OTP" });
+    }
+    
+    return Ok(new { Message = "Email verified" });
+}
