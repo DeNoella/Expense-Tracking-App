@@ -42,3 +42,9 @@ public IActionResult Create([FromBody] CategoryRequest request, CancellationToke
 {
     return BadRequest("Categories are now enum values. Cannot create new categories.");
 }
+[HttpPut("{id:guid}")]
+[RequirePermission("category.write")]
+public IActionResult Update(Guid id, [FromBody] CategoryRequest request, CancellationToken cancellationToken)
+{
+    return BadRequest("Categories are now enum values. Cannot update categories.");
+}
