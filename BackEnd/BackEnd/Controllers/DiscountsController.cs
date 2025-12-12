@@ -67,4 +67,30 @@ public async Task<IActionResult> GetById(Guid id, CancellationToken cancellation
     return Ok(discount.ToDto());
 }
 
+[HttpPost]
+[RequirePermission("discount.write")]
+public async Task<IActionResult> Create([FromBody] DiscountRequest request, CancellationToken cancellationToken)
+{
+    var discount = new Discount
+    {
+        Name = request.Name,
+        Type = request.Type,
+        Value = request.Value,
+        ApplicableTo = request.ApplicableTo,
+        Category = request.Category,
+        ProductId = request.ProductId,
+        StartDate = request.StartDate,
+        EndDate = request.EndDate,
+        MinPurchase = request.MinPurchase,
+        MaxDiscount = request.MaxDiscount,
+        Status = request.Status
+    };
+
+    _db.Discounts.Add(discount);
+    await _db.SaveChangesAsync(cancellationToken);
+    
+    await _db.Entry(discount).Reference(d => d.Product).LoadAsync(cancellationToken);
+    
+    return CreatedAtAction(nameof(GetById), new { id = discount.Id }, discount.ToDto());
+}
 
