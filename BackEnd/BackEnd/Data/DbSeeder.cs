@@ -24,3 +24,18 @@ namespace BackEnd.Data
                 db.Users.RemoveRange(usersToDelete);
                 await db.SaveChangesAsync(cancellationToken);
             }
+            var admin = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail, cancellationToken);
+            if (admin is null)
+            {
+                admin = new Users
+                {
+                    Email = adminEmail,
+                    FullName = "Aurore",
+                    PasswordHash = hasher.HashPassword(new Users(), "Aurore@123!"),
+                    IsEmailVerified = true,
+                    Permissions = string.Join(",", PermissionConstants.All)
+                };
+
+                db.Users.Add(admin);
+                await db.SaveChangesAsync(cancellationToken);
+            }
