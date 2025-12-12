@@ -149,3 +149,27 @@ public IActionResult GetAlerts()
 
     return Ok(alerts);
 }
+
+[HttpGet("performance")]
+[RequirePermission("analytics.view")]
+public IActionResult GetPerformance()
+{
+    var random = new Random();
+    var responseTimeData = Enumerable.Range(0, 24).Select(i => new
+    {
+        Hour = $"{i}:00",
+        Value = random.Next(30, 80)
+    }).ToList();
+
+    var requestVolumeData = Enumerable.Range(0, 24).Select(i => new
+    {
+        Hour = $"{i}:00",
+        Value = random.Next(8000, 13000)
+    }).ToList();
+
+    return Ok(new
+    {
+        ResponseTime = responseTimeData,
+        RequestVolume = requestVolumeData
+    });
+}
