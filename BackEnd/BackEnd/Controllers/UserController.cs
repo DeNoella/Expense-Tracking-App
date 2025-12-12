@@ -65,3 +65,45 @@ public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest reque
     
     return Ok(new { Message = "Email verified" });
 }
+[HttpPost("login")]
+[AllowAnonymous]
+public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+{
+    var response = await _authService.LoginAsync(request, cancellationToken);
+    
+    if (response.RequiresTwoFactor)
+    {
+        return Ok(response);
+    }
+    
+    if (response.Token is null)
+    {
+        return Unauthorized(response.Message ?? "Invalid credentials or email not verified");
+    }
+    
+    SetTokenCookies(response.Token);
+    
+    return Ok(new
+    {
+        Email = response.Token.Email,
+        Permissions = response.Token.Permissions,
+        ExpiresAt = response.Token.ExpiresAt
+    });
+}
+
+[HttpPost("verify-2fa")]
+[AllowAnonymous]
+public async Task<IActionResult> Verify2FA([FromBody] Verify2FARequest request, CancellationToken cancellationToken)
+{
+    var token = await _authService.Verify2FAAsync(request, cancellationToken);
+    if (token is null) return Unauthorized("Invalid or expired 2FA code");
+    
+    SetTokenCookies(token);
+    
+    return Ok(new
+    {
+        Email = token.Email,
+        Permissions = token.Permissions,
+        ExpiresAt = token.ExpiresAt
+    });
+}
