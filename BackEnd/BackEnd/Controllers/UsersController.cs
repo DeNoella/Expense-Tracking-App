@@ -136,3 +136,23 @@ public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationT
 
     return Ok(new { Message = "User deleted successfully" });
 }
+
+[HttpDelete("delete-all")]
+[RequirePermission("user.manage")]
+public async Task<IActionResult> DeleteAllUsers(CancellationToken cancellationToken)
+{
+    const string adminEmail = "aurorenadine25@gmail.com";
+    var allUsers = await _db.Users.ToListAsync(cancellationToken);
+    var usersToDelete = allUsers.Where(u => u.Email != adminEmail).ToList();
+    
+    if (!usersToDelete.Any())
+    {
+        return Ok(new { Message = "No users to delete (only admin exists)" });
+    }
+
+    _db.Users.RemoveRange(usersToDelete);
+    await _db.SaveChangesAsync(cancellationToken);
+
+    _logger.LogInformation("Deleted {Count} users (admin preserved)", usersToDelete.Count);
+    return Ok(new { Message = $"Successfully deleted {usersToDelete.Count} user(s). Admin account preserved." });
+}
