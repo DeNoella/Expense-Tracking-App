@@ -88,3 +88,17 @@ namespace BackEnd.Controllers
 
             return Ok(item.ToDto());
         }
+        [HttpDelete("items/{productId:guid}")]
+        [RequirePermission("cart.manage")]
+        public async Task<IActionResult> RemoveItem(Guid productId, CancellationToken cancellationToken)
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var cart = await GetOrCreateCartAsync(userId, cancellationToken);
+
+            var item = await _db.CartItems.FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.ProductId == productId, cancellationToken);
+            if (item is null) return NotFound();
+
+            _db.CartItems.Remove(item);
+            await _db.SaveChangesAsync(cancellationToken);
+            return NoContent();
+        }
