@@ -58,3 +58,36 @@ public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
 
     return Ok(userDtos);
 }
+[HttpGet("{id:guid}")]
+[RequirePermission("user.view.any")]
+public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+{
+    var user = await _db.Users
+        .AsNoTracking()
+        .Include(u => u.Orders)
+        .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+    if (user is null) return NotFound();
+
+    var permissions = string.IsNullOrEmpty(user.Permissions) 
+        ? new List<string>() 
+        : user.Permissions.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
+    
+    var userDto = new
+    {
+        user.Id,
+        user.Email,
+        user.FullName,
+        user.IsEmailVerified,
+        user.IsTwoFactorEnabled,
+        user.TwoFactorMethod,
+        user.CreatedAt,
+        OrdersCount = user.Orders.Count,
+        TotalSpent = user.Orders.Where(o => o.Status == Entities.OrderStatus.Delivered).Sum(o => o.Total),
+        Permissions = permissions,
+        HasAdminPermissions = permissions.Contains("order.view.any") || 
+                             permissions.Any(p => p.Contains("admin") || p == "user.manage" || p == "user.view.any")
+    };
+
+    return Ok(userDto);
+}
