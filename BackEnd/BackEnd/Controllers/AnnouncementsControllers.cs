@@ -19,4 +19,18 @@ namespace BackEnd.Controllers
         {
             _db = db;
         }
+                [HttpGet]
+        [RequirePermission("announcement.read")]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var announcements = await _db.Announcements
+                .AsNoTracking()
+                .OrderByDescending(a => a.Priority)
+                .ThenByDescending(a => a.CreatedAt)
+                .ToListAsync(cancellationToken);
+            
+            var announcementDtos = announcements.Select(a => a.ToDto()).ToList();
+            return Ok(announcementDtos);
+        }
+
 }
