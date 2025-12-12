@@ -35,3 +35,37 @@ namespace BackEnd.Controllers
             cartDto.Items = items.Select(i => i.ToDto()).ToList();
             return Ok(cartDto);
         }
+        [HttpPost("items")]
+        [RequirePermission("cart.manage")]
+        public async Task<IActionResult> AddItem([FromBody] CartItemRequest request, CancellationToken cancellationToken)
+        {
+            if (request.Quantity <= 0) return BadRequest("Quantity must be greater than zero");
+
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var cart = await GetOrCreateCartAsync(userId, cancellationToken);
+
+            var product = await _db.Products.FindAsync([request.ProductId], cancellationToken);
+            if (product is null || !product.IsActive) return BadRequest("Invalid product");
+
+            var item = await _db.CartItems.FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.ProductId == request.ProductId, cancellationToken);
+            if (item is null)
+            {
+                item = new CartItem
+                {
+                    CartId = cart.Id,
+                    ProductId = request.ProductId,
+                    Quantity = request.Quantity
+                };
+                _db.CartItems.Add(item);
+            }
+            else
+            {
+                item.Quantity += request.Quantity;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            await _db.Entry(item).Reference(i => i.Product).LoadAsync(cancellationToken);
+
+            return Ok(item.ToDto());
+        }
