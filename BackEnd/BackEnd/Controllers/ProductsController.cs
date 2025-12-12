@@ -114,3 +114,34 @@ public async Task<IActionResult> Create([FromBody] ProductRequest request, Cance
     
     return CreatedAtAction(nameof(GetById), new { id = product.Id }, product.ToDto());
 }
+
+[HttpPut("{id:guid}")]
+[RequirePermission("product.write")]
+public async Task<IActionResult> Update(Guid id, [FromBody] ProductRequest request, CancellationToken cancellationToken)
+{
+    var product = await _db.Products.FindAsync(new object?[] { id }, cancellationToken);
+    if (product is null) return NotFound();
+
+    if (request.Category.HasValue)
+        product.Category = request.Category.Value;
+    else if (request.CategoryId.HasValue && Enum.IsDefined(typeof(ProductCategory), request.CategoryId.Value))
+        product.Category = (ProductCategory)request.CategoryId.Value;
+
+    product.Name = request.Name;
+    product.Sku = request.Sku;
+    product.Price = request.Price;
+    product.OriginalPrice = request.OriginalPrice;
+    product.StockQty = request.StockQty;
+    product.ImageUrl = request.ImageUrl;
+    product.Description = request.Description;
+    product.Brand = request.Brand;
+    product.Rating = request.Rating;
+    product.ReviewCount = request.ReviewCount;
+    product.Tags = request.Tags;
+    product.IsActive = request.IsActive;
+    product.UpdatedAt = DateTime.UtcNow;
+
+    await _db.SaveChangesAsync(cancellationToken);
+    
+    return Ok(product.ToDto());
+}
