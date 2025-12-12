@@ -25,3 +25,36 @@ namespace BackEnd.Controllers
         }
     }
 }
+
+[HttpGet]
+[RequirePermission("user.view.any")]
+public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+{
+    var users = await _db.Users
+        .AsNoTracking()
+        .Include(u => u.Orders)
+        .OrderByDescending(u => u.CreatedAt)
+        .ToListAsync(cancellationToken);
+
+    var userDtos = users.Select(u => {
+        var perms = string.IsNullOrEmpty(u.Permissions) 
+            ? new List<string>() 
+            : u.Permissions.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
+        return new
+        {
+            u.Id,
+            u.Email,
+            u.FullName,
+            u.IsEmailVerified,
+            u.IsTwoFactorEnabled,
+            u.TwoFactorMethod,
+            u.CreatedAt,
+            OrdersCount = u.Orders.Count,
+            TotalSpent = u.Orders.Where(o => o.Status == Entities.OrderStatus.Delivered).Sum(o => o.Total),
+            Permissions = perms,
+            HasAdminPermissions = perms.Any(p => p.Contains("admin") || p == "order.view.any")
+        };
+    }).ToList();
+
+    return Ok(userDtos);
+}
