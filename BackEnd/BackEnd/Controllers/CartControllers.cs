@@ -19,3 +19,19 @@ namespace BackEnd.Controllers
         {
             _db = db;
         }
+        [HttpGet]
+        [RequirePermission("cart.manage")]
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var cart = await GetOrCreateCartAsync(userId, cancellationToken);
+
+            var items = await _db.CartItems
+                .Where(ci => ci.CartId == cart.Id)
+                .Include(ci => ci.Product)
+                .ToListAsync(cancellationToken);
+
+            var cartDto = cart.ToDto();
+            cartDto.Items = items.Select(i => i.ToDto()).ToList();
+            return Ok(cartDto);
+        }
