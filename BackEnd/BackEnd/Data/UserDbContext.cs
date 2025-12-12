@@ -16,3 +16,16 @@ namespace BackEnd.Data
         public DbSet<Discount> Discounts => Set<Discount>();
         public DbSet<Announcement> Announcements => Set<Announcement>();
         public DbSet<Image> Images => Set<Image>();
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Users>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<Users>()
+                .Property(u => u.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            modelBuilder.Entity<Users>()
+                .Property(u => u.UpdatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
